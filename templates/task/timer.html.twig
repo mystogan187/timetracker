@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Tarea: {{ timeEntry.task.name }}</h1>
+
+    <div id="timer">00:00:00</div>
+
+    <form action="{{ path('task_stop', {'id': timeEntry.id}) }}" method="post">
+        <button type="submit">Stop</button>
+    </form>
+
+    <script>
+        let startTime = new Date("{{ timeEntry.startTime|date('Y-m-d H:i:s', 'Europe/Madrid') }}");
+        function updateTimer() {
+            let now = new Date();
+            let elapsed = new Date(now - startTime);
+            let hours = String(elapsed.getUTCHours()).padStart(2, '0');
+            let minutes = String(elapsed.getUTCMinutes()).padStart(2, '0');
+            let seconds = String(elapsed.getUTCSeconds()).padStart(2, '0');
+            document.getElementById('timer').textContent = hours + ':' + minutes + ':' + seconds;
+        }
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    </script>
+{% endblock %}

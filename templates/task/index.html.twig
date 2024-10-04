@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Rastreador de Tiempo</h1>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <form action="{{ path('task_start') }}" method="post">
+        <label for="task_name">Nombre de la tarea:</label>
+        <input type="text" id="task_name" name="task_name" required>
+        <button type="submit">Start</button>
+    </form>
+
+    <a href="{{ path('task_summary') }}">Ver Resumen</a>
+{% endblock %}

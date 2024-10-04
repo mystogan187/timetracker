@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Resumen de Tareas</h1>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Tarea</th>
+            <th>Tiempo Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for task in tasks %}
+            <tr>
+                <td>{{ task.taskName }}</td>
+                <td>
+                    {% set hours = (task.totalDuration // 3600) %}
+                    {% set minutes = ((task.totalDuration % 3600) // 60) %}
+                    {% set seconds = (task.totalDuration % 60) %}
+                    {{ '%02d:%02d:%02d'|format(hours, minutes, seconds) }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <p>Total trabajado hoy:
+        {% set hours = (totalDayDuration // 3600) %}
+        {% set minutes = ((totalDayDuration % 3600) // 60) %}
+        {% set seconds = (totalDayDuration % 60) %}
+        {{ '%02d:%02d:%02d'|format(hours, minutes, seconds) }}
+    </p>
+
+    <a href="{{ path('index') }}">Volver al inicio</a>
+{% endblock %}
