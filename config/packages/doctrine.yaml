@@ -22,6 +22,18 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Entity'
                 prefix: 'App\Entity'
                 alias: App
+            Task:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/src/Entity/Task/Domain'
+                prefix: 'App\Entity\Task\Domain'
+                alias: Task
+            Time:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/src/Entity/Time/Domain'
+                prefix: 'App\Entity\Time\Domain'
+                alias: Time
         controller_resolver:
             auto_mapping: false
 

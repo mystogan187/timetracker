@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Time\Domain;
 
+use App\Entity\Task\Domain\Task;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity()]
@@ -25,56 +26,85 @@ class TimeEntry
     #[ORM\Column(type: 'integer', nullable: true)]
     private $duration;
 
-    public function getId(): ?int
+    /**
+     * @return mixed
+     */
+    public function getId()
     {
         return $this->id;
     }
 
-    public function getTask(): ?Task
+    /**
+     * @param mixed $id
+     */
+    public function setId($id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTask()
     {
         return $this->task;
     }
 
-    public function setTask(?Task $task): self
+    /**
+     * @param mixed $task
+     */
+    public function setTask($task): void
     {
         $this->task = $task;
-
-        return $this;
     }
 
-    public function getStartTime(): ?\DateTimeInterface
+    /**
+     * @return mixed
+     */
+    public function getStartTime()
     {
         return $this->startTime;
     }
 
-    public function setStartTime(\DateTimeInterface $startTime): self
+    /**
+     * @param mixed $startTime
+     */
+    public function setStartTime($startTime): void
     {
         $this->startTime = $startTime;
-
-        return $this;
     }
 
-    public function getEndTime(): ?\DateTimeInterface
+    /**
+     * @return mixed
+     */
+    public function getEndTime()
     {
         return $this->endTime;
     }
 
-    public function setEndTime(?\DateTimeInterface $endTime): self
+    /**
+     * @param mixed $endTime
+     */
+    public function setEndTime($endTime): void
     {
         $this->endTime = $endTime;
-
-        return $this;
     }
 
-    public function getDuration(): ?int
+    /**
+     * @return mixed
+     */
+    public function getDuration()
     {
         return $this->duration;
     }
 
-    public function setDuration(?int $duration): self
+    /**
+     * @param mixed $duration
+     */
+    public function setDuration($duration): void
     {
         $this->duration = $duration;
-
-        return $this;
     }
+
+
 }

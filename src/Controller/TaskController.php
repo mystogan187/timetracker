@@ -2,10 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\Task;
-use App\Entity\TimeEntry;
-use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Time\Application\StartTaskService;
+use App\Entity\Time\Application\StopTaskService;
+use App\Entity\Time\Application\GetSummaryService;
+use App\Entity\Time\Domain\TimeEntryRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,48 +20,25 @@ class TaskController extends AbstractController
     }
 
     #[Route('/start', name: 'task_start', methods: ['POST'])]
-    public function startTask(Request $request, EntityManagerInterface $entityManager): Response
+    public function startTask(Request $request, StartTaskService $startTaskService): Response
     {
         $taskName = $request->request->get('task_name');
 
-        if (empty($taskName)) {
-            $this->addFlash('error', 'Por favor, ingresa un nombre para la tarea.');
+        try {
+            $timeEntry = $startTaskService->execute($taskName);
+            return $this->redirectToRoute('task_timer', ['id' => $timeEntry->getId()]);
+        } catch (\Exception $e) {
+            $this->addFlash('error', $e->getMessage());
             return $this->redirectToRoute('index');
         }
-
-        $task = $entityManager->getRepository(Task::class)->findOneBy(['name' => $taskName]);
-
-        if (!$task) {
-            $task = new Task();
-            $task->setName($taskName);
-
-            $entityManager->persist($task);
-            $entityManager->flush();
-        }
-
-        $existingTimeEntry = $entityManager->getRepository(TimeEntry::class)->findOneBy([
-            'endTime' => null,
-        ]);
-
-        if ($existingTimeEntry) {
-            $this->addFlash('error', 'Ya hay una tarea en curso. Detén la tarea actual antes de iniciar una nueva.');
-            return $this->redirectToRoute('index');
-        }
-
-        $timeEntry = new TimeEntry();
-        $timeEntry->setTask($task);
-        $timeEntry->setStartTime(new DateTime());
-
-        $entityManager->persist($timeEntry);
-        $entityManager->flush();
-
-        return $this->redirectToRoute('task_timer', ['id' => $timeEntry->getId()]);
     }
 
     #[Route('/timer/{id}', name: 'task_timer', methods: ['GET'])]
-    public function showTimer(TimeEntry $timeEntry): Response
+    public function showTimer(int $id, TimeEntryRepository $timeEntryRepository): Response
     {
-        if ($timeEntry->getEndTime() !== null) {
+        $timeEntry = $timeEntryRepository->findById($id);
+
+        if (!$timeEntry || $timeEntry->getEndTime() !== null) {
             $this->addFlash('error', 'Esta tarea ya ha sido detenida.');
             return $this->redirectToRoute('index');
         }
@@ -72,44 +49,25 @@ class TaskController extends AbstractController
     }
 
     #[Route('/stop/{id}', name: 'task_stop', methods: ['POST'])]
-    public function stopTask(TimeEntry $timeEntry, EntityManagerInterface $entityManager): Response
+    public function stopTask(int $id, StopTaskService $stopTaskService): Response
     {
-        if ($timeEntry->getEndTime() !== null) {
-            $this->addFlash('error', 'Esta tarea ya ha sido detenida.');
+        try {
+            $stopTaskService->execute($id);
+            return $this->redirectToRoute('task_summary');
+        } catch (\Exception $e) {
+            $this->addFlash('error', $e->getMessage());
             return $this->redirectToRoute('index');
         }
-
-        $timeEntry->setEndTime(new DateTime());
-
-        $duration = $timeEntry->getEndTime()->getTimestamp() - $timeEntry->getStartTime()->getTimestamp();
-        $timeEntry->setDuration($duration);
-
-        $entityManager->flush();
-
-        return $this->redirectToRoute('task_summary');
     }
 
     #[Route('/summary', name: 'task_summary', methods: ['GET'])]
-    public function summary(EntityManagerInterface $entityManager): Response
+    public function summary(GetSummaryService $getSummaryService): Response
     {
-        $today = new DateTime();
-        $today->setTime(0, 0, 0);
-
-        $qb = $entityManager->createQueryBuilder();
-        $qb->select('t.name as taskName, SUM(te.duration) as totalDuration')
-            ->from(TimeEntry::class, 'te')
-            ->join('te.task', 't')
-            ->where('te.startTime >= :today')
-            ->setParameter('today', $today)
-            ->groupBy('t.id');
-
-        $results = $qb->getQuery()->getResult();
-
-        $totalDayDuration = array_sum(array_column($results, 'totalDuration'));
+        $data = $getSummaryService->execute();
 
         return $this->render('task/summary.html.twig', [
-            'tasks' => $results,
-            'totalDayDuration' => $totalDayDuration,
+            'tasks' => $data['tasks'],
+            'totalDayDuration' => $data['totalDayDuration'],
         ]);
     }
 }
