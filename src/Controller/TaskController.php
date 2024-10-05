@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Time\Application\StartTaskService;
-use App\Entity\Time\Application\StopTaskService;
+use App\Entity\Task\Application\StartTaskService;
 use App\Entity\Time\Application\GetSummaryService;
+use App\Entity\Time\Application\StopTaskService;
 use App\Entity\Time\Domain\TimeEntryRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\Time\Application;
+namespace App\Entity\Task\Application;
 
 
 use App\Entity\Task\Domain\Task;
